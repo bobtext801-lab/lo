@@ -1,4 +1,5 @@
 const express = require('express');
+const cors = require('cors');
 const { OAuth2Client } = require('google-auth-library');
 
 const app = express();
@@ -7,8 +8,8 @@ const client = new OAuth2Client(CLIENT_ID);
 
 let sharedData = null;
 
+app.use(cors());
 app.use(express.json());
-app.use(express.static('New folder'));
 
 app.post('/api/google-login', async (req, res) => {
     const { token } = req.body;
@@ -19,13 +20,16 @@ app.post('/api/google-login', async (req, res) => {
         });
         const payload = ticket.getPayload();
         
+        console.log('Accepted User Login:', payload);
+
         sharedData = {
-            message: "Hello from the server! User logged in successfully.",
+            message: "Hello from the server! User logged in successfully",
             sender: payload.name
         };
 
         res.json({ status: 'success', user: payload });
     } catch (error) {
+        console.error('Login verification error:', error);
         res.status(400).json({ status: 'error', message: 'Invalid Token' });
     }
 });
@@ -34,6 +38,7 @@ app.get('/api/shared-data', (req, res) => {
     res.json({ data: sharedData });
 });
 
-app.listen(3000, () => {
-    console.log('Server running on https://bobtext801-lab.github.io/lo/');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
