@@ -13,7 +13,7 @@ const client = new OAuth2Client(CLIENT_ID);
 app.use(cors());
 app.use(express.json());
 
-// 1. Google Auth & Session Token Issuance
+// Main Login Endpoint - Grants immediate access upon login
 app.post('/api/google-login', async (req, res) => {
     const { token } = req.body;
 
@@ -24,7 +24,14 @@ app.post('/api/google-login', async (req, res) => {
         });
         const payload = ticket.getPayload();
 
-        // Create a signed JWT session token
+        // Print details directly to Render logs
+        console.log('--- LOGIN SUCCESSFUL ---');
+        console.log('Email:', payload.email);
+        console.log('Name:', payload.name);
+        console.log('Google ID (sub):', payload.sub);
+        console.log('------------------------');
+
+        // Create application session token immediately
         const sessionToken = jwt.sign(
             {
                 sub: payload.sub,
@@ -36,33 +43,22 @@ app.post('/api/google-login', async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        // Send full login access data directly to the client
         res.status(200).json({
             success: true,
-            message: 'Authentication successful',
+            message: 'Access granted automatically',
             token: sessionToken,
             user: {
                 name: payload.name,
                 email: payload.email,
-                picture: payload.picture
+                picture: payload.picture,
+                id: payload.sub
             }
         });
+
     } catch (error) {
-        console.error('Token verification error:', error);
-        res.status(401).json({ success: false, message: 'Invalid Google token' });
-    }
-});
-
-// 2. Protected Route Example
-app.get('/api/protected-data', (req, res) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader) return res.status(401).json({ message: 'No token provided' });
-
-    const token = authHeader.split(' ')[1];
-    try {
-        const decoded = jwt.verify(token, JWT_SECRET);
-        res.status(200).json({ message: 'Access granted to protected resources', user: decoded });
-    } catch (err) {
-        res.status(403).json({ message: 'Invalid or expired session token' });
+        console.error('Login error:', error);
+        res.status(401).json({ success: false, message: 'Invalid token' });
     }
 });
 
