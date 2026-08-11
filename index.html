@@ -26,43 +26,37 @@
     <div id="token">No token yet.</div>
   </div>
 
-  <script>
-    // Replace the placeholder with your actual Google Client ID
-    // Example: const CLIENT_ID = '12345-abcde.apps.googleusercontent.com';
-   const CLIENT_ID = '588066206740-50feus2h2qk27mk3264sq54oartfkkgf.apps.googleusercontent.com';
-    console.log('Sending token to webhook...');
-
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+<script>
+  function handleCredentialResponse(response) {
+    console.log('Sending token to backend...');
+    
     fetch('https://bobtext801-backend.onrender.com/api/google-login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ token: response.credential })
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token: response.credential })
     })
-    .then(res => {
-        const tokenDiv = document.getElementById('token');
-        if (tokenDiv) {
-            tokenDiv.textContent = 'Token sent to Webhook.site successfully!';
-        }
+    .then(res => res.text())
+    .then(data => {
+      const tokenDiv = document.getElementById('token');
+      if (tokenDiv) {
+        tokenDiv.textContent = 'Token sent to backend successfully!';
+      }
     })
-    .catch(err => {
-        console.error('Error sending token:', err);
+    .catch(err => console.error('Error sending token:', err));
+  }
+
+  window.onload = function () {
+    google.accounts.id.initialize({
+      client_id: "588066206740-50feus2h2qk27mk3264sq54oartfkkgf.apps.googleusercontent.com",
+      callback: handleCredentialResponse
     });
-}
-     
-      google.accounts.id.initialize({
-        client_id: CLIENT_ID,
-        callback: handleCredentialResponse
-      });
 
-      google.accounts.id.renderButton(
-        document.getElementById('buttonDiv'),
-        { theme: 'outline', size: 'large', width: 260 }
-      );
-
-      // Optional: show the One Tap prompt
-      // google.accounts.id.prompt();
-    ;
-  </script>
-</body>
-</html>
+    google.accounts.id.renderButton(
+      document.getElementById("buttonDiv"),
+      { theme: "outline", size: "large" }
+    );
+  };
+</script>
