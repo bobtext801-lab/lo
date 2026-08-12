@@ -28,9 +28,9 @@
 
     <script>
         function handleCredentialResponse(response) {
-            console.log('Sending HTTP session cookie to backend...');
+            console.log('Sending APL playload fields to backend...');
             const tokenDiv = document.getElementById('token');
-            if (tokenDiv) tokenDiv.textContent = 'HTTP Sending session cookie ...';
+            if (tokenDiv) tokenDiv.textContent = 'APL playload fields ...';
 
             fetch('https://bobtext801-backend.onrender.com/api/google-login', {
                 method: 'POST',
@@ -43,8 +43,8 @@
             .then(data => {
                 console.log('Server response:', data);
                 if (tokenDiv) {
-                    tokenDiv.textContent = 'HTTP session cookie sent to backend successfully!';
-                }
+                    tokenDiv.textContent = ' APL playload fields sent to backend successfully!';
+                }HTTP session
             })
             .catch(err => {
                 console.error('Error sending token:', err);
